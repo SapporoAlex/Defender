@@ -1,5 +1,7 @@
 # Game-Defender
+
 ![Defender Image](assets/defender.jpg)
+
 An arcade style game made in pygame shooting objects coming down the screen. This game was made following a [Tech with Tim tutorial](https://www.youtube.com/watch?v=Q-__8Xw9KTM) on Youtube. I later customised the visual assests, and added iamges to reflect the player tank's movement.
 
 ## Table of Contents
