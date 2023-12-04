@@ -9,24 +9,24 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Defender")
 
 # Load images
-RED_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_tank_red.png"))
-GREEN_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_bmp_green_small.png"))
-BLUE_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_zombies_blue_small.png"))
+RED_ENEMY = pygame.image.load(os.path.join("assets", "pixel_tank_red.png"))
+GREEN_ENEMY = pygame.image.load(os.path.join("assets", "pixel_bmp_green_small.png"))
+BLUE_ENEMY = pygame.image.load(os.path.join("assets", "pixel_zombies_blue_small.png"))
 
 # Player ship
-YELLOW_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_tank_green.png"))
+YELLOW_LEOPARD = pygame.image.load(os.path.join("assets", "pixel_tank_green.png"))
 
 # Lasers
-RED_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_red.png"))
-GREEN_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_green.png"))
-BLUE_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_blue.png"))
-YELLOW_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_yellow.png"))
+RED_MISSILE = pygame.image.load(os.path.join("assets", "pixel_laser_red.png"))
+GREEN_MISSILE = pygame.image.load(os.path.join("assets", "pixel_laser_green.png"))
+BLUE_MISSILE = pygame.image.load(os.path.join("assets", "pixel_laser_blue.png"))
+YELLOW_MISSILE = pygame.image.load(os.path.join("assets", "pixel_laser_yellow.png"))
 
 # Background
 BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "background-mud.png")), (WIDTH, HEIGHT))
 
 
-class Laser:
+class Missile:
     def __init__(self, x, y, img):
         self.x = x
         self.y = y
@@ -44,11 +44,10 @@ class Laser:
         return not (self.y <= height and self.y >= 0)
 
     def collision(self, obj):
-        self.kills += 1
         return collide(obj, self)
 
 
-class Ship:
+class Vehicle:
     COOLDOWN = 30
 
     def __init__(self, x, y, health=100):
@@ -83,7 +82,7 @@ class Ship:
 
     def shoot(self):
         if self.cool_down_counter == 0:
-            laser = Laser(self.x, self.y, self.laser_img)
+            laser = Missile(self.x, self.y, self.laser_img)
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
@@ -94,11 +93,11 @@ class Ship:
         return self.ship_img.get_height()
 
 
-class Player(Ship):
+class Player(Vehicle):
     def __init__(self, x, y, health=100):
         super().__init__(x, y, health)
-        self.ship_img = YELLOW_SPACE_SHIP
-        self.laser_img = YELLOW_LASER
+        self.ship_img = YELLOW_LEOPARD
+        self.laser_img = YELLOW_MISSILE
         self.mask = pygame.mask.from_surface(self.ship_img)
         self.max_health = health
 
@@ -127,11 +126,11 @@ class Player(Ship):
                           (self.health / self.max_health), 10))
 
 
-class Enemy(Ship):
+class Enemy(Vehicle):
     COLOR_MAP = {
-        "red": (RED_SPACE_SHIP, RED_LASER),
-        "green": (GREEN_SPACE_SHIP, GREEN_LASER),
-        "blue": (BLUE_SPACE_SHIP, BLUE_LASER)
+        "red": (RED_ENEMY, RED_MISSILE),
+        "green": (GREEN_ENEMY, GREEN_MISSILE),
+        "blue": (BLUE_ENEMY, BLUE_MISSILE)
     }
 
     def __init__(self, x, y, colour, health=100):
@@ -144,7 +143,7 @@ class Enemy(Ship):
 
     def shoot(self):
         if self.cool_down_counter == 0:
-            laser = Laser(self.x - 20, self.y, self.laser_img)
+            laser = Missile(self.x - 20, self.y, self.laser_img)
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
