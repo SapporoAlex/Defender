@@ -2,7 +2,7 @@
 
 <img src="assets/sample.gif" width="400">
 
-An arcade style game made in pygame shooting objects coming down the screen. This game was made following a [Tech with Tim tutorial](https://www.youtube.com/watch?v=Q-__8Xw9KTM) on Youtube. I later customised the visual assests, and added images to reflect the player tank's movement.
+An arcade style game made in pygame shooting objects coming down the screen. This game was made following a [Tech with Tim tutorial](https://www.youtube.com/watch?v=Q-__8Xw9KTM) on Youtube. I later customised the visual and audio assests, adding sfx and images to reflect the player tank's movement.
 
 ## Table of Contents
 - [Requirements](#requirements)
