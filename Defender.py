@@ -30,7 +30,9 @@ explosion_sound = pygame.mixer.Sound("assets/explosion.mp3")
 level_up_sound = pygame.mixer.Sound("assets/level up.mp3")
 damaged_sound = pygame.mixer.Sound("assets/damage.mp3")
 death_sound = pygame.mixer.Sound("assets/death.mp3")
+health = pygame.image.load("assets/health.png")
 pygame.mixer.music.load("assets/idle.mp3")
+
 
 class Missile:
     def __init__(self, x, y, img):
@@ -155,6 +157,23 @@ class Enemy(Vehicle):
             self.cool_down_counter = 1
 
 
+class Pickup:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.health_img = health
+        self.mask = pygame.mask.from_surface(self.health_img)
+
+    def move(self, vel):
+        self.y += vel / 2
+
+    def draw(self, window):
+        window.blit(self.health_img, (self.x, self.y))
+
+    def get_height(self):
+        return self.health_img.get_height()
+
+
 def collide(obj1, obj2):
     offset_x = obj2.x - obj1.x
     offset_y = obj2.y - obj1.y
@@ -166,6 +185,7 @@ def main():
     FPS = 60
     level = 0
     line = 5
+    pickups = []
     main_font = pygame.font.SysFont("impact", 50)
     lost_font = pygame.font.SysFont("impact", 60)
 
@@ -185,17 +205,17 @@ def main():
 
     def redraw_window():
         WIN.blit(BG, (0, 0))
-        # Draw text
         line_label = main_font.render(f"Line: {line}", 1, (255, 255, 255))
         level_label = main_font.render(f"Level: {level}", 1, (255, 255, 255))
 
-        WIN.blit(line_label, (10, 10))
-        WIN.blit(level_label, (WIDTH - level_label.get_width() - 10, 10))
-
         for enemy in enemies:
             enemy.draw(WIN)
-
+        WIN.blit(line_label, (10, 10))
+        WIN.blit(level_label, (WIDTH - level_label.get_width() - 10, 10))
         player.draw(WIN)
+
+        for pickup in pickups:
+            pickup.draw(WIN)
 
         if lost:
             lost_label = lost_font.render("Fall back!", 1, (255, 255, 255))
@@ -216,6 +236,10 @@ def main():
                 run = False
             else:
                 continue
+
+        if level >= 2 and len(enemies) == 0:
+            pickup = Pickup(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
+            pickups.append(pickup)
 
         if len(enemies) == 0:
             level += 1
@@ -273,6 +297,16 @@ def main():
                 if laser.collision(enemy):
                     enemies.remove(enemy)
                     explosion_sound.play()
+
+        for pickup in pickups[:]:
+            pickup.move(enemy_vel)
+
+            if collide(pickup, player):
+                player.health = 100
+                pickups.remove(pickup)
+                level_up_sound.play()
+            elif pickup.y + pickup.get_height() > HEIGHT:
+                pickups.remove(pickup)
 
         player.move_lasers(-laser_vel, enemies)
 
