@@ -1,15 +1,22 @@
 # Game-Defender
 
-<img src="assets/sample.gif" width="400">
+<img src="assets/preview.gif" width="400">
 
-An arcade style game made in pygame shooting objects coming down the screen. This game was made following a [Tech with Tim tutorial](https://www.youtube.com/watch?v=Q-__8Xw9KTM) on Youtube. I later customised the visual and audio assests, adding sfx and images to reflect the player tank's movement.
+An arcade style game made in pygame shooting objects coming down the screen.
 
 ## Table of Contents
+- [Features](#features)
 - [Requirements](#requirements)
 - [Usage](#usage)
 - [File Structure](#file-structure)
 - [Author](#author)
 - [License](#license)
+
+## Features
+- Player controlled Leopard 2 tank with dynamic movement
+- 3 stages with a variety of enemies
+- 2 Pick-up items (health and armour upgrade)
+- Original sound effects
 
 ## Requirements
 - [Pygame](https://pypi.org/project/pygame/)
