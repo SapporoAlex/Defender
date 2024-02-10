@@ -1,6 +1,6 @@
 # Game-Defender
 
-<img src="assets/preview.gif" width="400"> <img src="screenshots.jpg" width="400">
+<img src="screenshots.jpg" width="420"> <img src="assets/preview.gif" width="400">
 
 An arcade style game made in pygame shooting objects coming down the screen.
 
