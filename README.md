@@ -37,7 +37,7 @@ An arcade style game made in pygame shooting objects coming down the screen.
 3. Follow the onscreen instructions to play. Movement controls are the arrow keys. Firing you weapon is SPACE. Shoot or drive into the oncoming enemies before they pass your position. Try to reach a high level of waves passed.
 
 ## File Structure
-- `assets`: Folder with png images
+- `assets`: Folder with png images and mp3s
 - `Defender.py`: Python script for running the game
 
 ## Author
