@@ -3,6 +3,7 @@
 <img src="screenshots.jpg" width="420"> <img src="assets/preview.gif" width="400">
 
 An arcade style game made in pygame shooting objects coming down the screen.
+This is based on the battle of Avdiivka from late 2023 to early 2024. Let us not forget the heroes of Ukraine. Slava Ukraine!
 
 ## Table of Contents
 - [Features](#features)
