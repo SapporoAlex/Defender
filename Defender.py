@@ -39,7 +39,9 @@ explosion_sound = pygame.mixer.Sound("assets/explosion.mp3")
 level_up_sound = pygame.mixer.Sound("assets/level up.mp3")
 damaged_sound = pygame.mixer.Sound("assets/damage.mp3")
 death_sound = pygame.mixer.Sound("assets/death.mp3")
-pygame.mixer.music.load("assets/idle.mp3")
+# If you prefer the sound of a tank engine over my music, you can use this
+#pygame.mixer.music.load("assets/idle.mp3")
+pygame.mixer.music.load("assets/music1.mp3")
 
 
 class Missile:
