@@ -34,7 +34,7 @@ An arcade style game made in pygame shooting objects coming down the screen.
    python Defender.py
    ```
 
-3. Follow the onscreen instructions to play. Movement controls are the arrow keys. Firing you weapon is SPACE. Shoot or drive into the oncoming enemies before they pass your position. Try to reach a high level of waves passed.
+3. Follow the onscreen instructions to play. Movement controls are the arrow keys. Firing you weapon is SPACE. Shoot or drive into the oncoming enemies before they pass your position. Defeat all waves of the Z attacks to progress. Slava Ukraine.
 
 ## File Structure
 - `assets`: Folder with png images and mp3s
