@@ -642,6 +642,14 @@ def level_2():
                             current_bg = snow_bg
                             level_3()
 
+        if waves == 6 and len(enemies) == 0 and big_boss_alive is False:
+            upgrade = Upgrade(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
+            upgrades.append(upgrade)
+
+        if waves == 5 and len(enemies) == 0 and big_boss_alive is False:
+            pickup = Pickup(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
+            pickups.append(pickup)
+
         if waves <= 4 and len(enemies) == 0 and big_boss_alive is False:
             pickup = Pickup(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
             pickups.append(pickup)
@@ -848,9 +856,10 @@ def level_3():
                 clear_count += 1
                 if clear_count > FPS * 3:
                     big_boss_alive = False
-                    between = True
                     boss_3_death.play()
+                    between = True
                 while between:
+                    pygame.mixer.init()
                     pygame.mixer.music.load('assets/win.mp3')
                     pygame.mixer.music.play(loops=-1)
                     current_bg = victory_bg
@@ -863,6 +872,22 @@ def level_3():
                             run = False
                         if event.type == pygame.MOUSEBUTTONDOWN:
                             main_menu()
+
+        if waves == 8 and len(enemies) == 0 and big_boss_alive is False:
+            pickup = Pickup(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
+            pickups.append(pickup)
+
+        if waves == 7 and len(enemies) == 0 and big_boss_alive is False:
+            upgrade = Upgrade(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
+            upgrades.append(upgrade)
+
+        if waves == 6 and len(enemies) == 0 and big_boss_alive is False:
+            pickup = Pickup(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
+            pickups.append(pickup)
+
+        if waves == 5 and len(enemies) == 0 and big_boss_alive is False:
+            upgrade = Upgrade(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
+            upgrades.append(upgrade)
 
         if waves <= 4 and len(enemies) == 0 and big_boss_alive is False:
             pickup = Pickup(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
@@ -999,4 +1024,3 @@ def main_menu():
 
 
 main_menu()
-
