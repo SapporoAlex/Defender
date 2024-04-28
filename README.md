@@ -16,6 +16,7 @@ This is based on the battle of Avdiivka from late 2023 to early 2024. Let us not
 ## Features
 - Player controlled Leopard 2 tank with dynamic movement
 - 3 stages with a variety of enemies
+- Each stage has a unique boss battle
 - 2 Pick-up items (health and armour upgrade)
 - Original sound effects
 
