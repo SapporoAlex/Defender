@@ -303,7 +303,7 @@ def level_1():
     current_bg = field_bg
     run = True
     FPS = 60
-    waves = 1
+    waves = 5
     line = 5
     pickups = []
     upgrades = []
@@ -526,7 +526,7 @@ def level_2():
     current_bg = mud_bg
     run = True
     FPS = 60
-    waves = 1
+    waves = 7
     line = 5
     pickups = []
     upgrades = []
