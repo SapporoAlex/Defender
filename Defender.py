@@ -18,6 +18,18 @@ upgrade_img = pygame.image.load("assets/upgrade.png").convert()
 pygame.display.set_icon(icon)
 
 YELLOW_LEOPARD = pygame.image.load(os.path.join("assets", "pixel_tank_green.png"))
+BOSS1DOWN = pygame.image.load(os.path.join("assets/boss1", "boss_1_down.png"))
+BOSS1LEFT = pygame.image.load(os.path.join("assets/boss1", "boss_1_left.png"))
+BOSS1RIGHT = pygame.image.load(os.path.join("assets/boss1", "boss_1_right.png"))
+BOSS1DESTROYED = pygame.image.load(os.path.join("assets/boss1", "boss_1_burn1.png"))
+BOSS2DOWN = pygame.image.load(os.path.join("assets/boss2", "boss2down.png"))
+BOSS2LEFT = pygame.image.load(os.path.join("assets/boss2", "boss2left.png"))
+BOSS2RIGHT = pygame.image.load(os.path.join("assets/boss2", "boss2right.png"))
+BOSS2DESTROYED = pygame.image.load(os.path.join("assets/boss2", "boss2burn1.png"))
+BOSS3DOWN = pygame.image.load(os.path.join("assets/boss3", "boss3down.png"))
+BOSS3LEFT = pygame.image.load(os.path.join("assets/boss3", "boss3left.png"))
+BOSS3RIGHT = pygame.image.load(os.path.join("assets/boss3", "boss3right.png"))
+BOSS3DESTROYED = pygame.image.load(os.path.join("assets/boss3", "boss3burn1.png"))
 
 RED_MISSILE = pygame.image.load(os.path.join("assets", "pixel_laser_red.png"))
 GREEN_MISSILE = pygame.image.load(os.path.join("assets", "pixel_laser_green.png"))
@@ -116,6 +128,77 @@ class Vehicle:
         return self.ship_img.get_height()
 
 
+class Bigboss(Vehicle):
+    def __init__(self, x, y, health=500):
+        super().__init__(x, y, health)
+        self.ship_img = BOSS1DOWN
+        self.laser_img = RED_MISSILE
+        self.mask = pygame.mask.from_surface(self.ship_img)
+        self.max_health = health
+        self.speed = 2
+        self.direction = 'down'
+        self.destroyed = False
+        self.step_index = 0
+
+    def move(self):
+        if not self.destroyed:
+            if self.y <= 100:
+                self.y += 2
+            if self.y == 100 and self.direction == 'down':
+                self.direction = 'left'
+            if self.x < 50 and self.y >= 100:
+                self.direction = 'right'
+            if self.x > 600 and self.y >= 100:
+                self.direction = 'left'
+            if self.direction == 'left':
+                self.x -= 2
+            if self.direction == 'right':
+                self.x += 2
+
+    def draw(self, window):
+        if not self.destroyed:
+            super().draw(window)
+            self.healthbar(window)
+        else:
+            super().draw(window)
+
+    def healthbar(self, window):
+        pygame.draw.rect(window, (255, 0, 0),
+                         (self.x, self.y + self.ship_img.get_height() - 120, self.ship_img.get_width(), 10))
+        pygame.draw.rect(window, (0, 255, 0),
+                         (self.x, self.y + self.ship_img.get_height() - 120, self.ship_img.get_width() *
+                          (self.health / self.max_health), 10))
+
+    def move_lasers(self, vel, obj):
+        self.cooldown()
+        for laser in self.lasers:
+            laser.move(vel)
+            if laser.off_screen(HEIGHT):
+                self.lasers.remove(laser)
+            elif laser.collision(obj):
+                obj.health -= 10
+                self.lasers.remove(laser)
+
+    def cooldown(self):
+        if self.cool_down_counter >= self.COOLDOWN:
+            self.cool_down_counter = 0
+        elif self.cool_down_counter > 0:
+            self.cool_down_counter += 1
+
+    def shoot(self):
+        if self.cool_down_counter == 0:
+            laser = Missile(self.x, self.y, self.laser_img)
+            self.lasers.append(laser)
+            self.cool_down_counter = 1
+            shoot_sound.play()
+
+    def get_width(self):
+        return self.ship_img.get_width()
+
+    def get_height(self):
+        return self.ship_img.get_height()
+
+
 class Player(Vehicle):
     def __init__(self, x, y, health=100):
         super().__init__(x, y, health)
@@ -136,6 +219,7 @@ class Player(Vehicle):
                         objs.remove(obj)
                         if laser in self.lasers:
                             self.lasers.remove(laser)
+
 
     def draw(self, window):
         super().draw(window)
@@ -232,12 +316,14 @@ def level_1():
     laser_vel = 20
     clear_sound_played = 0
     player = Player(300, 630)
-
     clock = pygame.time.Clock()
-
     lost = False
     lost_count = 0
     clear_count = 0
+
+    number_of_big_bosses = 0
+    big_boss_defeated = False
+    big_boss_alive = False
 
     def redraw_window():
         WIN.blit(current_bg, (0, 0))
@@ -254,6 +340,9 @@ def level_1():
             upgrade.draw(WIN)
 
         player.draw(WIN)
+
+        if big_boss_alive:
+            big_boss.draw(WIN)
 
         WIN.blit(line_label, (10, 10))
         WIN.blit(level_label, (WIDTH - level_label.get_width() - 10, 10))
@@ -281,41 +370,51 @@ def level_1():
             else:
                 continue
 
-        if waves == 0 and clear_sound_played == 0:
+        if waves == 0 and clear_sound_played == 0 and big_boss_defeated and len(enemies) < 1:
             pygame.mixer.music.stop()
             clear_sound_played = 1
             clear_sound.play(0)
 
         if waves == 0:
-            combat = False
-            between = False
-            clear_count += 1
-            if clear_count > FPS * 3:
-                between = True
-            while between:
-                current_bg = black_bg
-                proceed_label = lost_font.render("Proceed to next combat zone", 1, (255, 255, 255))
-                proceed_label_next_stage = lost_font.render('level 2 "Mud"', 1, (255, 255, 255))
-                WIN.blit(current_bg, (0, 0))
-                WIN.blit(proceed_label, (WIDTH / 2 - proceed_label.get_width() / 2, 150))
-                WIN.blit(proceed_label_next_stage, (WIDTH / 2 - proceed_label_next_stage.get_width() / 2, 210))
-                pygame.display.update()
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        run = False
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        current_bg = mud_bg
-                        level_2()
+            if number_of_big_bosses < 1:
+                big_boss = Bigboss(325, -200)
+                number_of_big_bosses += 1
+                big_boss_alive = True
+            if big_boss.health == 0:
+                big_boss.destroyed = True
+                big_boss.ship_img = BOSS1DESTROYED
+                big_boss_defeated = True
+            if big_boss_defeated is True and len(enemies) < 1:
+                combat = False
+                between = False
+                clear_count += 1
+                if clear_count > FPS * 3:
+                    big_boss_alive = False
+                    between = True
+                while between:
+                    current_bg = black_bg
+                    proceed_label = lost_font.render("Proceed to next combat zone", 1, (255, 255, 255))
+                    proceed_label_next_stage = lost_font.render('level 2 "Mud"', 1, (255, 255, 255))
+                    WIN.blit(current_bg, (0, 0))
+                    WIN.blit(proceed_label, (WIDTH / 2 - proceed_label.get_width() / 2, 150))
+                    WIN.blit(proceed_label_next_stage, (WIDTH / 2 - proceed_label_next_stage.get_width() / 2, 210))
+                    pygame.display.update()
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            run = False
+                        if event.type == pygame.MOUSEBUTTONDOWN:
+                            current_bg = mud_bg
+                            level_2()
 
-        if waves <= 4 and len(enemies) == 0:
+        if waves <= 4 and len(enemies) == 0 and big_boss_alive is False:
             pickup = Pickup(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
             pickups.append(pickup)
 
-        if waves == 3 and len(enemies) == 0:
+        if waves == 3 and len(enemies) == 0 and big_boss_alive is False:
             upgrade = Upgrade(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
             upgrades.append(upgrade)
 
-        if len(enemies) == 0 and combat:
+        if len(enemies) == 0 and combat and big_boss_alive is False:
             waves -= 1
             level_up_sound.play()
             wave_length += 3  # Adds 5 more enemies to the next wave
@@ -373,6 +472,28 @@ def level_1():
                         explosion_sound.play()
                         enemies.remove(enemy)
 
+            if big_boss_defeated is False and big_boss_alive:
+                big_boss.move()
+                big_boss.move_lasers(laser_vel, player)
+                if big_boss.direction == 'left':
+                    big_boss.ship_img = BOSS1LEFT
+                if big_boss.direction == 'right':
+                    big_boss.ship_img = BOSS1RIGHT
+                if big_boss.direction == 'down':
+                    big_boss.ship_img = BOSS1DOWN
+
+                if random.randrange(0, 2 * 60) == 1:
+                    big_boss.shoot()
+                if collide(big_boss, player):
+                    player.health -= 10
+                    big_boss.health -= 10
+                    damaged_sound.play()
+                    death_sound.play()
+                for laser in player.lasers:
+                    if laser.collision(big_boss):
+                        big_boss.health -= 10
+                        explosion_sound.play()
+
             for pickup in pickups[:]:
                 pickup.move(enemy_vel)
 
@@ -410,7 +531,6 @@ def level_2():
     upgrades = []
     main_font = pygame.font.SysFont("impact", 50)
     lost_font = pygame.font.SysFont("impact", 60)
-
     enemies = []
     wave_length = 6
     enemy_vel = 1
@@ -418,6 +538,10 @@ def level_2():
     laser_vel = 20
     clear_sound_played = 0
     player = Player(300, 630)
+    number_of_big_bosses = 0
+    big_boss_defeated = False
+    big_boss_alive = False
+
 
     clock = pygame.time.Clock()
 
@@ -440,6 +564,9 @@ def level_2():
 
         for upgrade in upgrades:
             upgrade.draw(WIN)
+
+        if big_boss_alive:
+            big_boss.draw(WIN)
 
         player.draw(WIN)
 
@@ -466,51 +593,57 @@ def level_2():
             else:
                 continue
 
-        if waves == 0 and clear_sound_played == 0:
+        if waves == 0 and clear_sound_played == 0 and big_boss_defeated and len(enemies) < 1:
             pygame.mixer.music.stop()
             clear_sound_played = 1
             clear_sound.play(0)
 
-        if waves == 0:
-            combat = False
-            between = False
-            clear_count += 1
-            if clear_count > FPS * 3:
-                between = True
-            while between:
-                current_bg = black_bg
-                proceed_label = lost_font.render("Proceed to next combat zone", 1, (255, 255, 255))
-                proceed_label_next_stage = lost_font.render('level 3 "Snow"', 1, (255, 255, 255))
-                WIN.blit(current_bg, (0, 0))
-                WIN.blit(proceed_label, (WIDTH / 2 - proceed_label.get_width() / 2, 150))
-                WIN.blit(proceed_label_next_stage, (WIDTH / 2 - proceed_label_next_stage.get_width() / 2, 210))
-                pygame.display.update()
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        run = False
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        current_bg = snow_bg
-                        level_3()
+            if waves == 0:
+                if number_of_big_bosses < 1:
+                    big_boss = Bigboss(325, -200, health=1000)
+                    number_of_big_bosses += 1
+                    big_boss_alive = True
+                if big_boss.health == 0:
+                    big_boss.destroyed = True
+                    big_boss.ship_img = BOSS2DESTROYED
+                    big_boss_defeated = True
+                if big_boss_defeated is True and len(enemies) < 1:
+                    combat = False
+                    between = False
+                    clear_count += 1
+                    if clear_count > FPS * 3:
+                        big_boss_alive = False
+                        between = True
+                    while between:
+                        current_bg = black_bg
+                        proceed_label = lost_font.render("Proceed to next combat zone", 1, (255, 255, 255))
+                        proceed_label_next_stage = lost_font.render('level 3 "Snow"', 1, (255, 255, 255))
+                        WIN.blit(current_bg, (0, 0))
+                        WIN.blit(proceed_label, (WIDTH / 2 - proceed_label.get_width() / 2, 150))
+                        WIN.blit(proceed_label_next_stage, (WIDTH / 2 - proceed_label_next_stage.get_width() / 2, 210))
+                        pygame.display.update()
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                run = False
+                            if event.type == pygame.MOUSEBUTTONDOWN:
+                                current_bg = snow_bg
+                                level_3()
 
-        if waves <= 10 and len(enemies) == 0:
+        if waves <= 4 and len(enemies) == 0 and big_boss_alive is False:
             pickup = Pickup(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
             pickups.append(pickup)
 
-        if waves == 4 and len(enemies) == 0:
+        if waves == 3 and len(enemies) == 0 and big_boss_alive is False:
             upgrade = Upgrade(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
             upgrades.append(upgrade)
 
-        if waves == 7 and len(enemies) == 0:
-            upgrade = Upgrade(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
-            upgrades.append(upgrade)
-
-        if len(enemies) == 0 and combat:
+        if len(enemies) == 0 and combat and big_boss_alive is False:
             waves -= 1
             level_up_sound.play()
             wave_length += 3  # Adds 5 more enemies to the next wave
             for i in range(wave_length):  # Spawns enemies at random negative y locations
                 enemy = Enemy(random.randrange(50, WIDTH - 100), random.randrange(-1500, -100),
-                              random.choice(["red", "green"]))
+                              random.choice(["blue", "green"]))
                 enemies.append(enemy)
 
         for event in pygame.event.get():
@@ -559,7 +692,29 @@ def level_2():
                     enemies.remove(enemy)
                 for laser in player.lasers:
                     if laser.collision(enemy):
+                        explosion_sound.play()
                         enemies.remove(enemy)
+
+            if big_boss_defeated is False and big_boss_alive:
+                big_boss.move()
+                big_boss.move_lasers(laser_vel, player)
+                if big_boss.direction == 'left':
+                    big_boss.ship_img = BOSS2LEFT
+                if big_boss.direction == 'right':
+                    big_boss.ship_img = BOSS2RIGHT
+                if big_boss.direction == 'down':
+                    big_boss.ship_img = BOSS2DOWN
+
+                if random.randrange(0, 2 * 30) == 1:
+                    big_boss.shoot()
+                if collide(big_boss, player):
+                    player.health -= 10
+                    big_boss.health -= 10
+                    damaged_sound.play()
+                    death_sound.play()
+                for laser in player.lasers:
+                    if laser.collision(big_boss):
+                        big_boss.health -= 10
                         explosion_sound.play()
 
             for pickup in pickups[:]:
@@ -588,6 +743,7 @@ def level_2():
             player.move_lasers(-laser_vel, enemies)
 
 
+
 def level_3():
     pygame.mixer.music.play(loops=-1)
     current_bg = snow_bg
@@ -599,7 +755,6 @@ def level_3():
     upgrades = []
     main_font = pygame.font.SysFont("impact", 50)
     lost_font = pygame.font.SysFont("impact", 60)
-
     enemies = []
     wave_length = 6
     enemy_vel = 1.5
@@ -607,9 +762,10 @@ def level_3():
     laser_vel = 20
     clear_sound_played = 0
     player = Player(300, 630)
-
+    number_of_big_bosses = 0
+    big_boss_defeated = False
+    big_boss_alive = False
     clock = pygame.time.Clock()
-
     lost = False
     lost_count = 0
     clear_count = 0
@@ -629,6 +785,9 @@ def level_3():
 
         for upgrade in upgrades:
             upgrade.draw(WIN)
+
+        if big_boss_alive:
+            big_boss.draw(WIN)
 
         player.draw(WIN)
 
@@ -655,52 +814,54 @@ def level_3():
             else:
                 continue
 
-        if waves == 0 and clear_sound_played == 0:
+        if waves == 0 and clear_sound_played == 0 and big_boss_defeated and len(enemies) < 1:
             pygame.mixer.music.stop()
             clear_sound_played = 1
             clear_sound.play(0)
 
         if waves == 0:
-            combat = False
-            between = False
-            clear_count += 1
-            if clear_count > FPS * 3:
-                between = True
-            while between:
-                current_bg = victory_bg
-                proceed_label = lost_font.render("Congratulations! You win!", 1, (255, 255, 255))
-                WIN.blit(current_bg, (0, 0))
-                WIN.blit(proceed_label, (WIDTH / 2 - proceed_label.get_width() / 2, 150))
-                pygame.display.update()
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        run = False
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        main_menu()
+            if number_of_big_bosses < 1:
+                big_boss = Bigboss(325, -200, health=2000)
+                number_of_big_bosses += 1
+                big_boss_alive = True
+            if big_boss.health == 0:
+                big_boss.destroyed = True
+                big_boss.ship_img = BOSS3DESTROYED
+                big_boss_defeated = True
+            if big_boss_defeated is True and len(enemies) < 1:
+                combat = False
+                between = False
+                clear_count += 1
+                if clear_count > FPS * 3:
+                    big_boss_alive = False
+                    between = True
+                while between:
+                    current_bg = victory_bg
+                    proceed_label = lost_font.render("Congratulations! You win!", 1, (255, 255, 255))
+                    WIN.blit(current_bg, (0, 0))
+                    WIN.blit(proceed_label, (WIDTH / 2 - proceed_label.get_width() / 2, 150))
+                    pygame.display.update()
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            run = False
+                        if event.type == pygame.MOUSEBUTTONDOWN:
+                            main_menu()
 
-        if waves >= 2 and len(enemies) == 0:
+        if waves <= 4 and len(enemies) == 0 and big_boss_alive is False:
             pickup = Pickup(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
             pickups.append(pickup)
 
-        if waves == 3 and len(enemies) == 0:
-            upgrade = Upgrade(random.randrange(50, WIDTH - 100), random.randrange(-1500, -100))
-            upgrades.append(upgrade)
-
-        if waves == 5 and len(enemies) == 0:
-            upgrade = Upgrade(random.randrange(50, WIDTH - 100), random.randrange(-1500, -100))
-            upgrades.append(upgrade)
-
-        if waves == 7 and len(enemies) == 0:
+        if waves == 3 and len(enemies) == 0 and big_boss_alive is False:
             upgrade = Upgrade(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
             upgrades.append(upgrade)
 
-        if len(enemies) == 0 and combat:
+        if len(enemies) == 0 and combat and big_boss_alive is False:
             waves -= 1
             level_up_sound.play()
-            wave_length += 5  # Adds 5 more enemies to the next wave
+            wave_length += 3  # Adds 5 more enemies to the next wave
             for i in range(wave_length):  # Spawns enemies at random negative y locations
                 enemy = Enemy(random.randrange(50, WIDTH - 100), random.randrange(-1500, -100),
-                              random.choice(["red", "blue", "green"]))
+                              random.choice(["blue", "green"]))
                 enemies.append(enemy)
 
         for event in pygame.event.get():
@@ -749,7 +910,29 @@ def level_3():
                     enemies.remove(enemy)
                 for laser in player.lasers:
                     if laser.collision(enemy):
+                        explosion_sound.play()
                         enemies.remove(enemy)
+
+            if big_boss_defeated is False and big_boss_alive:
+                big_boss.move()
+                big_boss.move_lasers(laser_vel, player)
+                if big_boss.direction == 'left':
+                    big_boss.ship_img = BOSS3LEFT
+                if big_boss.direction == 'right':
+                    big_boss.ship_img = BOSS3RIGHT
+                if big_boss.direction == 'down':
+                    big_boss.ship_img = BOSS3DOWN
+
+                if random.randrange(0, 2 * 20) == 1:
+                    big_boss.shoot()
+                if collide(big_boss, player):
+                    player.health -= 20
+                    big_boss.health -= 10
+                    damaged_sound.play()
+                    death_sound.play()
+                for laser in player.lasers:
+                    if laser.collision(big_boss):
+                        big_boss.health -= 10
                         explosion_sound.play()
 
             for pickup in pickups[:]:
@@ -797,3 +980,4 @@ def main_menu():
 
 
 main_menu()
+
