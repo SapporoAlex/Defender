@@ -303,7 +303,7 @@ def level_1():
     current_bg = field_bg
     run = True
     FPS = 60
-    waves = 5
+    waves = 1
     line = 5
     pickups = []
     upgrades = []
@@ -392,6 +392,7 @@ def level_1():
                     big_boss_alive = False
                     between = True
                 while between:
+                    number_of_big_bosses = 0
                     current_bg = black_bg
                     proceed_label = lost_font.render("Proceed to next combat zone", 1, (255, 255, 255))
                     proceed_label_next_stage = lost_font.render('level 2 "Mud"', 1, (255, 255, 255))
@@ -525,7 +526,7 @@ def level_2():
     current_bg = mud_bg
     run = True
     FPS = 60
-    waves = 7
+    waves = 1
     line = 5
     pickups = []
     upgrades = []
@@ -541,7 +542,6 @@ def level_2():
     number_of_big_bosses = 0
     big_boss_defeated = False
     big_boss_alive = False
-
 
     clock = pygame.time.Clock()
 
@@ -566,7 +566,7 @@ def level_2():
             upgrade.draw(WIN)
 
         if big_boss_alive:
-            big_boss.draw(WIN)
+            big_boss2.draw(WIN)
 
         player.draw(WIN)
 
@@ -598,36 +598,36 @@ def level_2():
             clear_sound_played = 1
             clear_sound.play(0)
 
-            if waves == 0:
-                if number_of_big_bosses < 1:
-                    big_boss = Bigboss(325, -200, health=1000)
-                    number_of_big_bosses += 1
-                    big_boss_alive = True
-                if big_boss.health == 0:
-                    big_boss.destroyed = True
-                    big_boss.ship_img = BOSS2DESTROYED
-                    big_boss_defeated = True
-                if big_boss_defeated is True and len(enemies) < 1:
-                    combat = False
-                    between = False
-                    clear_count += 1
-                    if clear_count > FPS * 3:
-                        big_boss_alive = False
-                        between = True
-                    while between:
-                        current_bg = black_bg
-                        proceed_label = lost_font.render("Proceed to next combat zone", 1, (255, 255, 255))
-                        proceed_label_next_stage = lost_font.render('level 3 "Snow"', 1, (255, 255, 255))
-                        WIN.blit(current_bg, (0, 0))
-                        WIN.blit(proceed_label, (WIDTH / 2 - proceed_label.get_width() / 2, 150))
-                        WIN.blit(proceed_label_next_stage, (WIDTH / 2 - proceed_label_next_stage.get_width() / 2, 210))
-                        pygame.display.update()
-                        for event in pygame.event.get():
-                            if event.type == pygame.QUIT:
-                                run = False
-                            if event.type == pygame.MOUSEBUTTONDOWN:
-                                current_bg = snow_bg
-                                level_3()
+        if waves == 0:
+            if number_of_big_bosses < 1:
+                big_boss2 = Bigboss(325, -200, health=1000)
+                number_of_big_bosses += 1
+                big_boss_alive = True
+            if big_boss2.health == 0:
+                big_boss2.destroyed = True
+                big_boss2.ship_img = BOSS2DESTROYED
+                big_boss_defeated = True
+            if big_boss_defeated is True and len(enemies) < 1:
+                combat = False
+                between = False
+                clear_count += 1
+                if clear_count > FPS * 3:
+                    big_boss_alive = False
+                    between = True
+                while between:
+                    current_bg = black_bg
+                    proceed_label = lost_font.render("Proceed to next combat zone", 1, (255, 255, 255))
+                    proceed_label_next_stage = lost_font.render('level 3 "Snow"', 1, (255, 255, 255))
+                    WIN.blit(current_bg, (0, 0))
+                    WIN.blit(proceed_label, (WIDTH / 2 - proceed_label.get_width() / 2, 150))
+                    WIN.blit(proceed_label_next_stage, (WIDTH / 2 - proceed_label_next_stage.get_width() / 2, 210))
+                    pygame.display.update()
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            run = False
+                        if event.type == pygame.MOUSEBUTTONDOWN:
+                            current_bg = snow_bg
+                            level_3()
 
         if waves <= 4 and len(enemies) == 0 and big_boss_alive is False:
             pickup = Pickup(random.randrange(50, WIDTH - 100),  random.randrange(-1500, -100))
@@ -696,25 +696,25 @@ def level_2():
                         enemies.remove(enemy)
 
             if big_boss_defeated is False and big_boss_alive:
-                big_boss.move()
-                big_boss.move_lasers(laser_vel, player)
-                if big_boss.direction == 'left':
-                    big_boss.ship_img = BOSS2LEFT
-                if big_boss.direction == 'right':
-                    big_boss.ship_img = BOSS2RIGHT
-                if big_boss.direction == 'down':
-                    big_boss.ship_img = BOSS2DOWN
+                big_boss2.move()
+                big_boss2.move_lasers(laser_vel, player)
+                if big_boss2.direction == 'left':
+                    big_boss2.ship_img = BOSS2LEFT
+                if big_boss2.direction == 'right':
+                    big_boss2.ship_img = BOSS2RIGHT
+                if big_boss2.direction == 'down':
+                    big_boss2.ship_img = BOSS2DOWN
 
                 if random.randrange(0, 2 * 30) == 1:
-                    big_boss.shoot()
-                if collide(big_boss, player):
+                    big_boss2.shoot()
+                if collide(big_boss2, player):
                     player.health -= 10
-                    big_boss.health -= 10
+                    big_boss2.health -= 10
                     damaged_sound.play()
                     death_sound.play()
                 for laser in player.lasers:
-                    if laser.collision(big_boss):
-                        big_boss.health -= 10
+                    if laser.collision(big_boss2):
+                        big_boss2.health -= 10
                         explosion_sound.play()
 
             for pickup in pickups[:]:
