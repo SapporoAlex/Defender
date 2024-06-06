@@ -6,7 +6,8 @@ pygame.font.init()
 pygame.mixer.init()
 
 WIDTH, HEIGHT = 750, 750
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+#WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+WIN = pygame.display.set_mode((WIDTH // 2, HEIGHT), pygame.FULLSCREEN)
 pygame.display.set_caption("Defender")
 
 RED_ENEMY = pygame.image.load(os.path.join("assets", "pixel_tank_red.png"))
@@ -226,7 +227,6 @@ class Player(Vehicle):
                         if laser in self.lasers:
                             self.lasers.remove(laser)
 
-
     def draw(self, window):
         super().draw(window)
         self.healthbar(window)
@@ -307,6 +307,8 @@ def collide(obj1, obj2):
 def level_1():
     pygame.mixer.music.load("assets/Alpha Mission - Jimena Contreras.mp3")
     pygame.mixer.music.play(loops=-1)
+    pygame.mixer_music.set_volume(0.1)
+    shoot_sound.set_volume(0.5)
     current_bg = field_bg
     run = True
     FPS = 60
@@ -386,6 +388,7 @@ def level_1():
         if waves == 0:
             if number_of_big_bosses < 1:
                 big_boss = Bigboss(325, -200)
+                boss_1_death.set_volume(6)
                 boss_1_entrance.play()
                 number_of_big_bosses += 1
                 big_boss_alive = True
@@ -400,6 +403,7 @@ def level_1():
                 if clear_count > FPS * 3:
                     big_boss_alive = False
                     between = True
+                    boss_1_death.set_volume(5)
                     boss_1_death.play()
                 while between:
                     number_of_big_bosses = 0
@@ -533,6 +537,8 @@ def level_1():
 
 def level_2():
     pygame.mixer.music.play(loops=-1)
+    pygame.mixer_music.set_volume(0.1)
+    shoot_sound.set_volume(0.5)
     current_bg = mud_bg
     run = True
     FPS = 60
@@ -611,6 +617,7 @@ def level_2():
 
         if waves == 0:
             if number_of_big_bosses < 1:
+                boss_2_entrance.set_volume(5)
                 boss_2_entrance.play()
                 big_boss2 = Bigboss(325, -200, health=1000)
                 number_of_big_bosses += 1
@@ -626,6 +633,7 @@ def level_2():
                 if clear_count > FPS * 3:
                     big_boss_alive = False
                     between = True
+                    boss_2_death.set_volume(5)
                     boss_2_death.play()
                 while between:
                     current_bg = black_bg
@@ -766,6 +774,8 @@ def level_2():
 
 def level_3():
     pygame.mixer.music.play(loops=-1)
+    pygame.mixer_music.set_volume(0.1)
+    shoot_sound.set_volume(0.5)
     current_bg = snow_bg
     run = True
     FPS = 60
@@ -842,6 +852,7 @@ def level_3():
 
         if waves == 0:
             if number_of_big_bosses < 1:
+                boss_3_entrance.set_volume(6)
                 boss_3_entrance.play()
                 big_boss = Bigboss(325, -200, health=2000)
                 number_of_big_bosses += 1
@@ -856,6 +867,7 @@ def level_3():
                 clear_count += 1
                 if clear_count > FPS * 3:
                     big_boss_alive = False
+                    boss_3_death.set_volume(5)
                     boss_3_death.play()
                     between = True
                 while between:
@@ -1008,6 +1020,7 @@ def main_menu():
     run = True
     between = False
     pygame.mixer.music.load('assets/win.mp3')
+    pygame.mixer.music.set_volume(1)
     pygame.mixer.music.play(loops=-1)
     while run:
         WIN.blit(title_bg, (0, 0))
